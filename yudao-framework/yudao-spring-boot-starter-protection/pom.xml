@@ -35,6 +35,23 @@
             <artifactId>lock4j-redisson-spring-boot-starter</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.yulichang</groupId>
+            <artifactId>mybatis-plus-join</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.yulichang</groupId>
+            <artifactId>mybatis-plus-join-core</artifactId>
+        </dependency>
+        <!-- 在 pom.xml 的 dependencies 节点下添加以下依赖 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>lock4j-spring-boot-starter</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

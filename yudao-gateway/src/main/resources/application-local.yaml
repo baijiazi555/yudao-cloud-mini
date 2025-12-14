@@ -1,18 +1,23 @@
---- #################### 注册中心 + 配置中心相关配置 ####################
-
 spring:
   cloud:
     nacos:
-      server-addr: 127.0.0.1:8848 # Nacos 服务器地址
-      username: # Nacos 账号
-      password: # Nacos 密码
-      discovery: # 【配置中心】配置项
-        namespace: dev # 命名空间。这里使用 dev 开发环境
-        group: DEFAULT_GROUP # 使用的 Nacos 配置分组，默认为 DEFAULT_GROUP
-      config: # 【注册中心】配置项
-        namespace: dev # 命名空间。这里使用 dev 开发环境
-        group: DEFAULT_GROUP # 使用的 Nacos 配置分组，默认为 DEFAULT_GROUP
-
+      # 配置中心（解决空配置警告）
+      config:
+        server-addr: 39.107.236.216:8848
+        namespace: yudao-cloud
+        group: DEFAULT_GROUP
+      # 注册中心（核心修复）
+      discovery:
+        server-addr: 39.107.236.216:8848
+        namespace: yudao-cloud
+        group: DEFAULT_GROUP
+        service: gateway-server
+        port: 48080
+        # 关键3：若Nacos服务端开启了认证，添加账号密码（默认nacos/nacos）
+        username: nacos
+        password: nacos
+        # 连接失败重试次数
+        fail-fast: false
 # 日志文件配置
 logging:
   level:

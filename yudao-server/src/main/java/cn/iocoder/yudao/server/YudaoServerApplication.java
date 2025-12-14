@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.server;
 
+import com.github.yulichang.autoconfigure.MybatisPlusJoinAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -18,7 +19,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
             // RPC 相关
 //            "org.springframework.cloud.openfeign.FeignAutoConfiguration",
 //            "cn.iocoder.yudao.module.system.framework.rpc.config.RpcConfiguration"
-        })
+        },exclude = MybatisPlusJoinAutoConfiguration.class)
 public class YudaoServerApplication {
 
     public static void main(String[] args) {

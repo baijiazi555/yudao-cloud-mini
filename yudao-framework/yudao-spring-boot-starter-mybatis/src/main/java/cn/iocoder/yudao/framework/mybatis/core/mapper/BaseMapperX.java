@@ -16,8 +16,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.toolkit.Db;
 import com.github.yulichang.base.MPJBaseMapper;
-import com.github.yulichang.interfaces.MPJBaseJoin;
-import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
@@ -54,50 +52,6 @@ public interface BaseMapperX<T> extends MPJBaseMapper<T> {
         return new PageResult<>(mpPage.getRecords(), mpPage.getTotal());
     }
 
-    default <D> PageResult<D> selectJoinPage(PageParam pageParam, Class<D> clazz, MPJLambdaWrapper<T> lambdaWrapper) {
-        // 特殊：不分页，直接查询全部
-        if (PageParam.PAGE_SIZE_NONE.equals(pageParam.getPageSize())) {
-            List<D> list = selectJoinList(clazz, lambdaWrapper);
-            return new PageResult<>(list, (long) list.size());
-        }
-
-        // MyBatis Plus Join 查询
-        IPage<D> mpPage = MyBatisUtils.buildPage(pageParam);
-        mpPage = selectJoinPage(mpPage, clazz, lambdaWrapper);
-        // 转换返回
-        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal());
-    }
-
-    /**
-     * 执行分页查询并返回结果。
-     *
-     * @param pageParam 分页参数，包含页码、每页条数和排序字段信息。如果 pageSize 为 {@link PageParam#PAGE_SIZE_NONE}，则不分页，直接查询所有数据。
-     * @param clazz     结果集的类类型
-     * @param lambdaWrapper MyBatis Plus Join 查询条件包装器
-     * @param <D>       结果集的泛型类型
-     * @return 返回分页查询的结果，包括总记录数和当前页的数据列表
-     */
-    default <D> PageResult<D> selectJoinPage(SortablePageParam pageParam, Class<D> clazz, MPJLambdaWrapper<T> lambdaWrapper) {
-        // 特殊：不分页，直接查询全部
-        if (PageParam.PAGE_SIZE_NONE.equals(pageParam.getPageSize())) {
-            List<D> list = selectJoinList(clazz, lambdaWrapper);
-            return new PageResult<>(list, (long) list.size());
-        }
-
-        // MyBatis Plus Join 查询
-        IPage<D> mpPage = MyBatisUtils.buildPage(pageParam, pageParam.getSortingFields());
-        mpPage = selectJoinPage(mpPage, clazz, lambdaWrapper);
-        // 转换返回
-        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal());
-    }
-
-    default <DTO> PageResult<DTO> selectJoinPage(PageParam pageParam, Class<DTO> resultTypeClass, MPJBaseJoin<T> joinQueryWrapper) {
-        IPage<DTO> mpPage = MyBatisUtils.buildPage(pageParam);
-        selectJoinPage(mpPage, resultTypeClass, joinQueryWrapper);
-        // 转换返回
-        return new PageResult<>(mpPage.getRecords(), mpPage.getTotal());
-    }
-
     default T selectOne(String field, Object value) {
         return selectOne(new QueryWrapper<T>().eq(field, value));
     }
@@ -119,29 +73,8 @@ public interface BaseMapperX<T> extends MPJBaseMapper<T> {
         return selectOne(new LambdaQueryWrapper<T>().eq(field1, value1).eq(field2, value2).eq(field3, value3));
     }
 
-    /**
-     * 获取满足条件的第 1 条记录
-     *
-     * 目的：解决并发场景下，插入多条记录后，使用 selectOne 会报错的问题
-     *
-     * @param field 字段名
-     * @param value 字段值
-     * @return 实体
-     */
-    default T selectFirstOne(SFunction<T, ?> field, Object value) {
-        // 如果明确使用 MySQL 等场景，可以考虑使用 LIMIT 1 进行优化
-        List<T> list = selectList(new LambdaQueryWrapper<T>().eq(field, value));
-        return CollUtil.getFirst(list);
-    }
-
     default T selectFirstOne(SFunction<T, ?> field1, Object value1, SFunction<T, ?> field2, Object value2) {
         List<T> list = selectList(new LambdaQueryWrapper<T>().eq(field1, value1).eq(field2, value2));
-        return CollUtil.getFirst(list);
-    }
-
-    default T selectFirstOne(SFunction<T,?> field1, Object value1, SFunction<T,?> field2, Object value2,
-                             SFunction<T,?> field3, Object value3) {
-        List<T> list = selectList(new LambdaQueryWrapper<T>().eq(field1, value1).eq(field2, value2).eq(field3, value3));
         return CollUtil.getFirst(list);
     }
 
@@ -203,32 +136,12 @@ public interface BaseMapperX<T> extends MPJBaseMapper<T> {
         return Db.saveBatch(entities);
     }
 
-    /**
-     * 批量插入，适合大量数据插入
-     *
-     * @param entities 实体们
-     * @param size     插入数量 Db.saveBatch 默认为 1000
-     */
-    default Boolean insertBatch(Collection<T> entities, int size) {
-        // 特殊：SQL Server 批量插入后，获取 id 会报错，因此通过循环处理
-        DbType dbType = JdbcUtils.getDbType();
-        if (JdbcUtils.isSQLServer(dbType)) {
-            entities.forEach(this::insert);
-            return CollUtil.isNotEmpty(entities);
-        }
-        return Db.saveBatch(entities, size);
-    }
-
     default int updateBatch(T update) {
         return update(update, new QueryWrapper<>());
     }
 
     default Boolean updateBatch(Collection<T> entities) {
         return Db.updateBatchById(entities);
-    }
-
-    default Boolean updateBatch(Collection<T> entities, int size) {
-        return Db.updateBatchById(entities, size);
     }
 
     default int delete(String field, String value) {
